@@ -1,70 +1,160 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export interface ITask {
+  task: string,
+  day: string
+}
 
-export default function HomeScreen() {
+export default function App() {
+  const [task, setTask] = useState('');
+  const [day, setDay] = useState('');
+  const [tasks, setTasks] = useState([] as Array<ITask>);
+
+  const handleAddTask = () => {
+    if(task.trim() && day.trim()) {
+      setTasks([...tasks, {task, day}]);
+      setTask('');
+      setDay('');
+    }
+  }
+
+  const handleDeleteTask = (index: number) => {
+    const newTasks = [...tasks];
+    newTasks.splice(index, 1);
+    setTasks(newTasks);
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <Text style={styles.title}>Lista de Tarefas</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.table}>
+          <View style={[styles.row, styles.header]}>
+            <Text style={[styles.cell, styles.headerText]}>Tarefa</Text>
+            <Text style={[styles.cell, styles.headerText, styles.headerDay]}>Dia</Text>
+            <Text style={[styles.cell, styles.headerText]}></Text>
+          </View>
+        </View>
+        {tasks.map((item: ITask, index: number) => (
+          <View key={index} style={[styles.row, index !== tasks.length - 1 && styles.borderBottom]}>
+            <Text style={[styles.cell, styles.borderRight]}>{item.task}</Text>
+            <Text style={[styles.cell, styles.borderRight]}>{item.day}</Text>
+            <TouchableOpacity onPress={() => handleDeleteTask(index)} style={[styles.deleteButton, styles.borderRight]}>
+              <Text style={styles.buttonText}>Excluir</Text>
+            </TouchableOpacity>
+
+          </View>
+        ))}
+      </ScrollView>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, styles.taskInput]}
+          placeholder="Tarefa"
+          value={task}
+          onChangeText={(text) => setTask(text)}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+        <TextInput
+          style={[styles.input, styles.dayInput]}
+          placeholder="Dia para realizar a tarefa"
+          value={day}
+          onChangeText={(text) => setDay(text)}
+        />
+        <TouchableOpacity onPress={handleAddTask}>
+          <View style={styles.addButton}>
+            <Text style={styles.buttonText}>Adicionar</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#94b2e9',
+    paddingTop: 60,
+    paddingHorizontal: 20
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 20,
+    color: '#333',
+    textAlign: 'center',
+    textTransform: 'uppercase'
+  },
+  scrollContainer: {
+    flexShrink: 1
+  },
+  table: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10
+  },
+  header: {
+    backgroundColor: '#f8f8f8'
+  }, 
+  cell: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
+  headerText: {
+    fontWeight: 'bold'
+  },
+  headerDay: {
+    textAlign: 'center'
+  },
+  borderBottom: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc'
+  },
+  borderRight: {
+    borderRightWidth: 1,
+    borderRightColor: '#ccc'
+  },
+  deleteButton: {
+    padding: 10,
+  },
+  buttonText: {
+    color: '#ff5555',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 10
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  input: {
+    flex: 1,
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginRight: 10
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  taskInput: {
+    marginRight: 10
   },
+  dayInput: {
+    marginRight: 10
+  },
+  addButton: {
+    backgroundColor: '#8be9fd',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginRight: 10
+  }
 });
